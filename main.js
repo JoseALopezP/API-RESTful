@@ -5,6 +5,12 @@ const aplication = express();
 //Defining Routes
 const routeProducts = Router();
 
+//json
+aplication.use(express.json());
+aplication.use(express.urlencoded({ extended: true}));
+
+//Public
+aplication.use(express.static(__dirname + '/public'));
 
 //Routes
 const port = 8080;
@@ -15,7 +21,8 @@ class Container {
     }
 
     save(object) {
-        let id = 1;
+        const id = 1;
+        console.log(object);
         this.products.forEach(element => {
             if(element.id >= id){
                 id = element.id + 1;
@@ -61,30 +68,11 @@ class Container {
 const products = new Container([]);
 
 //Testing
-products.save({
-    title:'Queso',
-    price: 1250,
-    thumbnail:'https://www.lacteoslatam.com/wp-content/uploads/2022/09/Estudio-de-la-transferencia-de-NaCl-en-el-queso-costeno-picado.jpg'
-});
-products.save({
-    title:'Jamon',
-    price: 2100,
-    thumbnail:'https://http2.mlstatic.com/D_NQ_NP_712474-MLA46939913329_082021-O.jpg'
-});
-products.save({
-    title:'Mortadela',
-    price: 1340,
-    thumbnail:'https://tusuper.com.ar/image/cache/catalog/P2020/Carnes-Fiambres/mortadela---800x800.jpg'
-});
-products.save({
-    title:'Salame',
-    price: 1930,
-    thumbnail:'https://http2.mlstatic.com/D_NQ_NP_681853-MLA47272906419_082021-O.jpg'
-});
+
 
 //Endpoints
-routeProducts.get('/:id', async (petition, response) => {
-    const id = parseInt(petition.params.id);
+routeProducts.get('/:id', async (request, response) => {
+    const id = parseInt(request.params.id);
     const product = products.getById(id);
     if (product) {
       response.json(product);
@@ -94,25 +82,29 @@ routeProducts.get('/:id', async (petition, response) => {
     }
 });
 
-routeProducts.get('/', (petition, response) => {
+routeProducts.get('/', (request, response) => {
     const productList = products.getAll();
     response.json(productList);
 });
   
-routeProducts.post('/', (peticion, respuesta) => {
+routeProducts.post('/', (request, response) => {
+    const product = request.body;
+    products.save(product);
+    response.send('ok');
 });
   
-routeProducts.put('/:id', (peticion, respuesta) => {
+routeProducts.put('/:id', (request, respuesta) => {
+    const id = parseInt(request.params.id);
 });
   
-routeProducts.delete('/:id', (peticion, respuesta) => {
+routeProducts.delete('/:id', (request, respuesta) => {
+    const id = parseInt(request.params.id);
+    products.delete(id);
+    response.send('Producto Eliminado');
 });
 
 aplication.use('/products', routeProducts);
-
-//json
-aplication.use(express.json());
-aplication.use(express.urlencoded({ extended: true}));
+aplication.use('/api/products', routeProducts);
 
 
 
